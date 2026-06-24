@@ -1,0 +1,51 @@
+{
+  "updated_at": "2026-06-24T14:35:00+07:00",
+  "working_on": {
+    "feature": "Việt hóa & Nâng cấp giao diện",
+    "task": "Nghiệm thu toàn bộ dự án qua /check-project và chuẩn bị đóng gói",
+    "status": "completed",
+    "files": [
+      "README.md",
+      "app.py",
+      "templates/index.html"
+    ],
+    "blockers": [],
+    "notes": "Đã chạy 13/13 tests thành công."
+  },
+  "pending_tasks": [],
+  "recent_changes": [
+    {
+      "timestamp": "2026-06-24T14:35:00+07:00",
+      "type": "feature",
+      "description": "Việt hóa giao diện, tài liệu README, backend error messages. Nâng cấp Premium Dark Mode. Vá bảo mật Argument Injection. Tối ưu parallel fetch.",
+      "files": [
+        "README.md",
+        "app.py",
+        "templates/index.html",
+        "test_app.py"
+      ]
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Argument Injection vulnerability",
+      "solution": "Thêm kiểm tra tiền tố URL http:// hoặc https:// ở backend và viết test cases xác thực.",
+      "resolved": true
+    },
+    {
+      "error": "Memory Leak & Disk Overflow",
+      "solution": "Thêm luồng daemon dọn dẹp file tải và jobs cũ sau 1 giờ.",
+      "resolved": true
+    }
+  ],
+  "decisions_made": [
+    {
+      "decision": "Sử dụng font chữ Inter thay vì DM Mono cho giao diện tiếng Việt.",
+      "reason": "Font Inter hiển thị tiếng Việt đẹp hơn, chuyên nghiệp hơn."
+    },
+    {
+      "decision": "Dùng Promise.all song song hóa fetch thông tin video.",
+      "reason": "Tránh nghẽn hàng đợi (blocking) khi người dùng dán nhiều liên kết cùng lúc."
+    }
+  ]
+}

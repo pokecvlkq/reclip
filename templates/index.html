@@ -1,42 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReClip — Free Media Downloader</title>
+  <title>ReClip — Trình tải video & nhạc miễn phí</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f4f1eb;
-      --fg: #3a3a38;
-      --accent: #e85d2a;
-      --accent-hover: #d04e1f;
-      --muted: #9c9889;
-      --card: #fff;
-      --card-border: #e2ded6;
-      --success: #2d8a4e;
-      --error: #c43d3d;
-      --radius: 14px;
-      --shimmer: linear-gradient(90deg, #ebe8e2 25%, #f0ede7 50%, #ebe8e2 75%);
+      --bg: #0f0f11;
+      --fg: #f5f5f7;
+      --accent-gradient: linear-gradient(135deg, #ff7a59 0%, #ff527b 100%);
+      --accent-color: #ff7a59;
+      --muted: #8e8e93;
+      --card: #1a1a1f;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --success: #34c759;
+      --error: #ff453a;
+      --radius: 16px;
+      --shimmer: linear-gradient(90deg, #1a1a1f 25%, #25252a 50%, #1a1a1f 75%);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'DM Mono', monospace;
-      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 122, 89, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 82, 123, 0.05) 0%, transparent 40%);
       color: var(--fg);
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
     }
 
     body::after {
       content: '';
       position: fixed;
       inset: 0;
-      opacity: 0.03;
+      opacity: 0.02;
       pointer-events: none;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
       background-size: 128px;
@@ -51,19 +56,25 @@
     .brand { margin-bottom: 48px; }
     .brand h1 {
       font-family: 'Instrument Serif', serif;
-      font-size: 4.2rem;
+      font-size: 4.5rem;
       font-weight: 400;
       letter-spacing: -0.03em;
       line-height: 1;
-      color: var(--fg);
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
     }
-    .brand h1 em { font-style: italic; color: var(--accent); }
+    .brand h1 em {
+      font-style: italic;
+    }
     .brand p {
       margin-top: 10px;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--muted);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      font-weight: 500;
     }
 
     textarea {
@@ -71,88 +82,117 @@
       padding: 18px 20px;
       border: 1.5px solid var(--card-border);
       border-radius: var(--radius);
-      background: var(--card);
+      background: rgba(26, 26, 31, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: var(--fg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
       outline: none;
       resize: none;
-      min-height: 56px;
+      min-height: 70px;
       transition: border-color 0.25s, box-shadow 0.25s;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
     }
     textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(232, 93, 42, 0.08);
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.15);
     }
     textarea::placeholder { color: var(--muted); }
 
     .hint {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: var(--muted);
       margin-bottom: 20px;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
     }
 
     .controls {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 6px;
       align-items: center;
     }
     .pill-group {
       display: flex;
       border: 1.5px solid var(--card-border);
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
-      background: var(--card);
+      background: rgba(26, 26, 31, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 3px;
     }
     .pill {
-      padding: 9px 18px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.76rem;
+      padding: 8px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
       border: none;
+      border-radius: 9px;
       background: transparent;
       color: var(--muted);
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      transition: all 0.25s ease;
+      letter-spacing: 0.02em;
     }
-    .pill.active { background: var(--fg); color: var(--bg); }
-    .pill:not(.active):hover { color: var(--fg); }
+    .pill.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .pill:not(.active):hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
 
     .fetch-btn {
       flex: 1;
       padding: 10px 20px;
       border: none;
-      border-radius: 10px;
-      background: var(--accent);
+      border-radius: 12px;
+      background: var(--accent-gradient);
       color: #fff;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(255, 122, 89, 0.25);
     }
-    .fetch-btn:hover { background: var(--accent-hover); }
-    .fetch-btn:active { transform: scale(0.98); }
-    .fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .fetch-btn:hover:not(:disabled) {
+      box-shadow: 0 0 20px rgba(255, 122, 89, 0.4), 0 4px 15px rgba(255, 122, 89, 0.25);
+      transform: translateY(-1px);
+    }
+    .fetch-btn:active:not(:disabled) { transform: scale(0.98); }
+    .fetch-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
 
     /* Cards */
     .cards { margin-top: 24px; }
 
     .card {
       display: flex;
-      gap: 14px;
+      gap: 16px;
       border: 1.5px solid var(--card-border);
       border-radius: var(--radius);
-      background: var(--card);
-      padding: 14px;
-      margin-bottom: 10px;
+      background: rgba(26, 26, 31, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
       animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: border-color 0.3s ease;
+    }
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
     }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -163,11 +203,12 @@
       width: 120px;
       min-width: 120px;
       height: 80px;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
-      background: var(--card-border);
+      background: #25252a;
       flex-shrink: 0;
       position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
     .card-thumb img {
       width: 100%;
@@ -187,7 +228,7 @@
     .card-thumb .no-thumb svg {
       width: 28px;
       height: 28px;
-      opacity: 0.5;
+      opacity: 0.4;
     }
 
     /* Shimmer skeleton for loading state */
@@ -202,7 +243,7 @@
       background: var(--shimmer);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .skeleton-line.short { width: 40%; height: 10px; }
     .skeleton-line.medium { width: 75%; }
@@ -219,79 +260,105 @@
       justify-content: center;
     }
     .card-title {
-      font-family: 'Instrument Serif', serif;
-      font-size: 1rem;
-      line-height: 1.3;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
       color: var(--fg);
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     .card-meta {
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       color: var(--muted);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      font-weight: 400;
+      margin-bottom: 10px;
     }
 
     .card-actions {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .card-dl-btn {
-      padding: 6px 14px;
+      padding: 7px 16px;
       border: none;
-      border-radius: 7px;
-      background: var(--fg);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 500;
+      border-radius: 8px;
+      background: #fff;
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
+      transition: all 0.3s ease;
+      letter-spacing: 0.02em;
       text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
-    .card-dl-btn:hover { background: #2d2d2a; }
+    .card-dl-btn:hover:not(:disabled) {
+      background: #e5e5ea;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+    }
     .card-dl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .card-dl-btn.done { background: var(--success); color: #fff; }
-    .card-dl-btn.error { background: var(--error); color: #fff; }
+    .card-dl-btn.done {
+      background: var(--success);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
+    }
+    .card-dl-btn.done:hover {
+      background: #2ebd50;
+      box-shadow: 0 0 12px rgba(52, 199, 89, 0.4);
+    }
+    .card-dl-btn.error {
+      background: var(--error);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 73, 73, 0.2);
+    }
+    .card-dl-btn.error:hover {
+      background: #ff3b30;
+      box-shadow: 0 0 12px rgba(255, 69, 58, 0.4);
+    }
 
     .card-status {
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       color: var(--muted);
+      font-weight: 500;
     }
-    .card-status.downloading { color: var(--accent); }
+    .card-status.downloading { color: var(--accent-color); }
     .card-status.done { color: var(--success); }
     .card-status.error { color: var(--error); }
 
     .q-chip {
       padding: 4px 10px;
-      border: 1.5px solid var(--card-border);
+      border: 1px solid var(--card-border);
       border-radius: 6px;
-      background: transparent;
+      background: rgba(255, 255, 255, 0.02);
       color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.65rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
     }
     .q-chip.active {
-      border-color: var(--fg);
-      color: var(--fg);
-      background: rgba(26,26,24,0.04);
+      border-color: #fff;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
     }
-    .q-chip:hover:not(.active) { border-color: var(--muted); }
+    .q-chip:hover:not(.active) {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
 
     /* Error card */
     .card.card-error {
-      border-color: rgba(196, 61, 61, 0.2);
-      background: rgba(196, 61, 61, 0.03);
+      border-color: rgba(255, 69, 58, 0.25);
+      background: rgba(255, 69, 58, 0.03);
     }
     .card-error-icon {
       width: 100%;
@@ -299,7 +366,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(196, 61, 61, 0.08);
+      background: rgba(255, 69, 58, 0.1);
       color: var(--error);
     }
     .card-error-icon svg {
@@ -307,40 +374,45 @@
       height: 24px;
     }
     .card-error-msg {
-      font-size: 0.72rem;
+      font-size: 0.78rem;
       color: var(--error);
       margin-top: 2px;
       line-height: 1.4;
+      font-weight: 500;
     }
     .card-error-url {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: var(--muted);
       word-break: break-all;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     /* Download all bar */
     .dl-all-bar {
       display: flex;
       gap: 10px;
-      margin-top: 16px;
+      margin-top: 18px;
     }
     .dl-all-btn {
       flex: 1;
       padding: 12px;
       border: none;
-      border-radius: 10px;
-      background: var(--fg);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 500;
+      border-radius: 12px;
+      background: #fff;
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
     }
-    .dl-all-btn:hover { background: #2d2d2a; }
+    .dl-all-btn:hover:not(:disabled) {
+      background: #e5e5ea;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+    }
     .dl-all-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .spin {
@@ -357,11 +429,11 @@
     .footer {
       margin-top: 48px;
       text-align: center;
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       color: var(--muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      letter-spacing: 0.04em;
       line-height: 1.8;
+      opacity: 0.7;
     }
 
     /* Mobile */
@@ -384,18 +456,18 @@
   <div class="page">
     <div class="brand">
       <h1>Re<em>Clip</em></h1>
-      <p>Free media downloader</p>
+      <p>Trình tải video & nhạc miễn phí</p>
     </div>
 
-    <textarea id="urls" placeholder="Paste one or more URLs..." rows="2"></textarea>
-    <p class="hint">Multiple links? Separate with spaces, commas, or newlines.</p>
+    <textarea id="urls" placeholder="Dán một hoặc nhiều liên kết (URL) vào đây..." rows="2"></textarea>
+    <p class="hint">Nhiều liên kết? Hãy phân tách bằng dấu cách, dấu phẩy hoặc xuống dòng.</p>
 
     <div class="controls">
       <div class="pill-group">
         <button class="pill active" data-format="video" onclick="setFormat(this)">MP4</button>
         <button class="pill" data-format="audio" onclick="setFormat(this)">MP3</button>
       </div>
-      <button class="fetch-btn" id="goBtn" onclick="go()">Fetch</button>
+      <button class="fetch-btn" id="goBtn" onclick="go()">Lấy thông tin</button>
     </div>
 
     <div id="cards" class="cards"></div>
@@ -403,7 +475,7 @@
     <div class="footer">
       YouTube &middot; TikTok &middot; Instagram &middot; Twitter/X &middot; Reddit &middot; Facebook<br>
       Vimeo &middot; Twitch &middot; Dailymotion &middot; SoundCloud &middot; Loom &middot; Streamable<br>
-      Pinterest &middot; Tumblr &middot; Threads &middot; LinkedIn &middot; 1000+ more
+      Pinterest &middot; Tumblr &middot; Threads &middot; LinkedIn &middot; và hơn 1000+ trang khác
     </div>
   </div>
 
@@ -435,15 +507,16 @@
     }
 
     function friendlyError(err) {
-      if (err.includes('Unsupported URL')) return 'This URL is not supported';
-      if (err.includes('Video unavailable')) return 'Video is unavailable or private';
-      if (err.includes('Private video')) return 'This video is private';
-      if (err.includes('HTTP Error 403')) return 'Access denied by the platform';
-      if (err.includes('HTTP Error 404')) return 'Video not found';
-      if (err.includes('copyright')) return 'Video blocked due to copyright';
-      if (err.includes('geo')) return 'Video not available in your region';
-      if (err.includes('timed out') || err.includes('Timed out')) return 'Request timed out — try again';
-      if (err.includes('network') || err.includes('Network')) return 'Network error — check your connection';
+      if (!err) return '';
+      if (err.includes('Unsupported URL')) return 'Liên kết không được hỗ trợ';
+      if (err.includes('Video unavailable')) return 'Video không có sẵn hoặc ở chế độ riêng tư';
+      if (err.includes('Private video')) return 'Video này ở chế độ riêng tư';
+      if (err.includes('HTTP Error 403')) return 'Quyền truy cập bị từ chối bởi nền tảng';
+      if (err.includes('HTTP Error 404')) return 'Không tìm thấy video';
+      if (err.includes('copyright')) return 'Video bị chặn do vi phạm bản quyền';
+      if (err.includes('geo')) return 'Video không khả dụng ở quốc gia của bạn';
+      if (err.includes('timed out') || err.includes('Timed out')) return 'Yêu cầu quá hạn — vui lòng thử lại';
+      if (err.includes('network') || err.includes('Network')) return 'Lỗi kết nối mạng — vui lòng kiểm tra mạng của bạn';
       return err.length > 80 ? err.slice(0, 80) + '...' : err;
     }
 
@@ -458,21 +531,20 @@
       const btn = document.getElementById('goBtn');
       const container = document.getElementById('cards');
       btn.disabled = true;
-      btn.textContent = 'Loading...';
+      btn.textContent = 'Đang tải...';
       container.innerHTML = '';
-      cardData = [];
+      
+      // Khởi tạo trước danh sách card với trạng thái loading để hiển thị ngay trên UI
+      cardData = urls.map(url => ({ url, status: 'loading' }));
+      cardData.forEach((_, idx) => renderCard(idx));
 
-      for (let i = 0; i < urls.length; i++) {
-        const url = urls[i];
-        const idx = cardData.length;
-        cardData.push({ url, status: 'loading' });
-        renderCard(idx);
-
+      // Thực hiện fetch song song (Parallel) thay vì tuần tự để tối ưu hóa hiệu năng tải thông tin
+      const promises = cardData.map(async (item, idx) => {
         try {
           const res = await fetch('/api/info', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url }),
+            body: JSON.stringify({ url: item.url }),
           });
           const data = await res.json();
           if (data.error) {
@@ -493,14 +565,16 @@
           cardData[idx] = { ...cardData[idx], status: 'info-error', error: err.message };
         }
         renderCard(idx);
-      }
+      });
+
+      await Promise.all(promises);
 
       if (cardData.filter(c => c.status === 'ready').length > 1) {
         renderDownloadAll();
       }
 
       btn.disabled = false;
-      btn.textContent = 'Fetch';
+      btn.textContent = 'Lấy thông tin';
     }
 
     function renderCard(idx) {
@@ -536,7 +610,7 @@
             </div>
           </div>
           <div class="card-body">
-            <div class="card-title" style="color:var(--error)">Could not fetch video</div>
+            <div class="card-title" style="color:var(--error)">Không thể lấy thông tin video</div>
             <div class="card-error-msg">${esc(friendlyError(c.error || ''))}</div>
             <div class="card-error-url">${esc(c.url)}</div>
           </div>
@@ -550,7 +624,7 @@
 
       let thumbHtml;
       if (isAudio) {
-        thumbHtml = `<div class="no-thumb" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
+        thumbHtml = `<div class="no-thumb" style="color:var(--accent-color)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
       } else if (c.thumbnail) {
         thumbHtml = `<img src="${c.thumbnail}" alt="">`;
       } else {
@@ -566,21 +640,21 @@
 
       let actionHtml = '';
       if (c.status === 'ready') {
-        actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Download</button>${qualityChips}`;
+        actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Tải về</button>${qualityChips}`;
       } else if (c.status === 'downloading') {
-        actionHtml = `<span class="card-status downloading"><span class="spin"></span> Downloading...</span>`;
+        actionHtml = `<span class="card-status downloading"><span class="spin"></span> Đang tải...</span>`;
       } else if (c.status === 'done') {
-        actionHtml = `<button class="card-dl-btn done" onclick="saveCard(${idx})">Save</button>
+        actionHtml = `<button class="card-dl-btn done" onclick="saveCard(${idx})">Lưu</button>
           <span class="card-status done">${esc(c.filename || '')}</span>`;
       } else if (c.status === 'error') {
-        actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Retry</button>
-          <span class="card-status error">${esc(friendlyError(c.error || 'Download failed'))}</span>`;
+        actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Thử lại</button>
+          <span class="card-status error">${esc(friendlyError(c.error || 'Tải về thất bại'))}</span>`;
       }
 
       el.innerHTML = `
         <div class="card-thumb">${thumbHtml}</div>
         <div class="card-body">
-          <div class="card-title">${esc(c.title || 'Untitled')}</div>
+          <div class="card-title">${esc(c.title || 'Không có tiêu đề')}</div>
           <div class="card-meta">${esc(c.uploader)}${c.duration ? ' · ' + fmtDur(c.duration) : ''}</div>
           <div class="card-actions">${actionHtml}</div>
         </div>
@@ -594,7 +668,7 @@
       const bar = document.createElement('div');
       bar.id = 'dl-all-bar';
       bar.className = 'dl-all-bar';
-      bar.innerHTML = `<button class="dl-all-btn" onclick="dlAll()">Download All</button>`;
+      bar.innerHTML = `<button class="dl-all-btn" onclick="dlAll()">Tải tất cả</button>`;
       document.getElementById('cards').appendChild(bar);
     }
 
@@ -657,7 +731,7 @@
         } catch {
           clearInterval(iv);
           c.status = 'error';
-          c.error = 'Lost connection to server';
+          c.error = 'Mất kết nối tới máy chủ';
           renderCard(idx);
         }
       }, 1000);
@@ -674,7 +748,7 @@
 
     async function dlAll() {
       const btn = document.querySelector('.dl-all-btn');
-      if (btn) { btn.disabled = true; btn.textContent = 'Downloading...'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'Đang tải...'; }
 
       for (let i = 0; i < cardData.length; i++) {
         if (cardData[i].status === 'ready') {
@@ -682,7 +756,7 @@
         }
       }
 
-      if (btn) { btn.disabled = false; btn.textContent = 'Download All'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Tải tất cả'; }
     }
   </script>
 </body>

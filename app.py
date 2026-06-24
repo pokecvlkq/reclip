@@ -4,6 +4,7 @@ import glob
 import json
 import subprocess
 import threading
+import time
 from flask import Flask, request, jsonify, send_file, render_template
 
 app = Flask(__name__)
@@ -11,13 +12,33 @@ DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 jobs = {}
+jobs_lock = threading.Lock()
+
+
+def get_ytdlp_path():
+    """Tự động tìm kiếm đường dẫn yt-dlp trong môi trường ảo venv của dự án"""
+    venv_dir = os.path.join(os.path.dirname(__file__), "venv")
+    if os.path.exists(venv_dir):
+        # Windows
+        win_path = os.path.join(venv_dir, "Scripts", "yt-dlp.exe")
+        if os.path.exists(win_path):
+            return win_path
+        # Unix/Linux/macOS
+        unix_path = os.path.join(venv_dir, "bin", "yt-dlp")
+        if os.path.exists(unix_path):
+            return unix_path
+    return "yt-dlp"
 
 
 def run_download(job_id, url, format_choice, format_id):
-    job = jobs[job_id]
+    with jobs_lock:
+        job = jobs.get(job_id)
+    if not job:
+        return
     out_template = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
 
-    cmd = ["yt-dlp", "--no-playlist", "-o", out_template]
+    ytdlp_bin = get_ytdlp_path()
+    cmd = [ytdlp_bin, "--no-playlist", "-o", out_template]
 
     if format_choice == "audio":
         cmd += ["-x", "--audio-format", "mp3"]
@@ -38,7 +59,7 @@ def run_download(job_id, url, format_choice, format_id):
         files = glob.glob(os.path.join(DOWNLOAD_DIR, f"{job_id}.*"))
         if not files:
             job["status"] = "error"
-            job["error"] = "Download completed but no file was found"
+            job["error"] = "Tải xong nhưng không tìm thấy file"
             return
 
         if format_choice == "audio":
@@ -67,7 +88,7 @@ def run_download(job_id, url, format_choice, format_id):
             job["filename"] = os.path.basename(chosen)
     except subprocess.TimeoutExpired:
         job["status"] = "error"
-        job["error"] = "Download timed out (5 min limit)"
+        job["error"] = "Hết thời gian tải (giới hạn 5 phút)"
     except Exception as e:
         job["status"] = "error"
         job["error"] = str(e)
@@ -83,9 +104,12 @@ def get_info():
     data = request.json
     url = data.get("url", "").strip()
     if not url:
-        return jsonify({"error": "No URL provided"}), 400
+        return jsonify({"error": "Chưa nhập đường dẫn"}), 400
+    if not (url.startswith("http://") or url.startswith("https://")):
+        return jsonify({"error": "Đường dẫn không hợp lệ. Phải bắt đầu bằng http:// hoặc https://"}), 400
 
-    cmd = ["yt-dlp", "--no-playlist", "-j", url]
+    ytdlp_bin = get_ytdlp_path()
+    cmd = [ytdlp_bin, "--no-playlist", "-j", url]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:
@@ -119,7 +143,7 @@ def get_info():
             "formats": formats,
         })
     except subprocess.TimeoutExpired:
-        return jsonify({"error": "Timed out fetching video info"}), 400
+        return jsonify({"error": "Hết thời gian lấy thông tin video"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -133,10 +157,18 @@ def start_download():
     title = data.get("title", "")
 
     if not url:
-        return jsonify({"error": "No URL provided"}), 400
+        return jsonify({"error": "Chưa nhập đường dẫn"}), 400
+    if not (url.startswith("http://") or url.startswith("https://")):
+        return jsonify({"error": "Đường dẫn không hợp lệ. Phải bắt đầu bằng http:// hoặc https://"}), 400
 
     job_id = uuid.uuid4().hex[:10]
-    jobs[job_id] = {"status": "downloading", "url": url, "title": title}
+    with jobs_lock:
+        jobs[job_id] = {
+            "status": "downloading",
+            "url": url,
+            "title": title,
+            "created_at": time.time()
+        }
 
     thread = threading.Thread(target=run_download, args=(job_id, url, format_choice, format_id))
     thread.daemon = True
@@ -147,9 +179,10 @@ def start_download():
 
 @app.route("/api/status/<job_id>")
 def check_status(job_id):
-    job = jobs.get(job_id)
+    with jobs_lock:
+        job = jobs.get(job_id)
     if not job:
-        return jsonify({"error": "Job not found"}), 404
+        return jsonify({"error": "Không tìm thấy tác vụ"}), 404
     return jsonify({
         "status": job["status"],
         "error": job.get("error"),
@@ -159,10 +192,42 @@ def check_status(job_id):
 
 @app.route("/api/file/<job_id>")
 def download_file(job_id):
-    job = jobs.get(job_id)
+    with jobs_lock:
+        job = jobs.get(job_id)
     if not job or job["status"] != "done":
-        return jsonify({"error": "File not ready"}), 404
+        return jsonify({"error": "File chưa sẵn sàng"}), 404
     return send_file(job["file"], as_attachment=True, download_name=job["filename"])
+
+
+def cleanup_old_jobs():
+    """Tiến trình chạy ngầm để dọn dẹp các tệp tải về và dữ liệu task cũ sau 1 giờ"""
+    while True:
+        time.sleep(600)  # Chạy mỗi 10 phút
+        try:
+            now = time.time()
+            cutoff = now - 3600  # 1 giờ trước
+            
+            # Xóa các file cũ trong downloads
+            for filepath in glob.glob(os.path.join(DOWNLOAD_DIR, "*")):
+                try:
+                    if os.path.getmtime(filepath) < cutoff:
+                        os.remove(filepath)
+                except OSError:
+                    pass
+            
+            # Xóa các job cũ khỏi jobs dict để tránh memory leak
+            with jobs_lock:
+                for j_id in list(jobs.keys()):
+                    j_data = jobs[j_id]
+                    if j_data.get("created_at", 0) < cutoff:
+                        jobs.pop(j_id, None)
+        except Exception:
+            pass
+
+
+# Khởi động thread dọn dẹp
+cleanup_thread = threading.Thread(target=cleanup_old_jobs, daemon=True)
+cleanup_thread.start()
 
 
 if __name__ == "__main__":

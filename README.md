@@ -1,6 +1,6 @@
 # ReClip
 
-A self-hosted, open-source video and audio downloader with a clean web UI. Paste links from YouTube, TikTok, Instagram, Twitter/X, and 1000+ other sites — download as MP4 or MP3.
+Công cụ tải video và âm thanh self-hosted, mã nguồn mở với giao diện web tinh giản. Dán đường dẫn từ YouTube, TikTok, Instagram, Twitter/X và hơn 1000 trang web khác — tải xuống dưới dạng MP4 hoặc MP3.
 
 ![Python](https://img.shields.io/badge/python-3.8+-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -9,58 +9,62 @@ https://github.com/user-attachments/assets/419d3e50-c933-444b-8cab-a9724986ba05
 
 ![ReClip MP3 Mode](assets/preview-mp3.png)
 
-## Features
+## Tính năng
 
-- Download videos from 1000+ supported sites (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- MP4 video or MP3 audio extraction
-- Quality/resolution picker
-- Bulk downloads — paste multiple URLs at once
-- Automatic URL deduplication
-- Clean, responsive UI — no frameworks, no build step
-- Single Python file backend (~150 lines)
+- Tải video từ hơn 1000 trang web được hỗ trợ (thông qua [yt-dlp](https://github.com/yt-dlp/yt-dlp))
+- Xuất video MP4 hoặc trích xuất âm thanh MP3
+- Trình chọn chất lượng/độ phân giải
+- Tải hàng loạt — dán nhiều đường dẫn cùng lúc
+- Tự động loại bỏ các đường dẫn trùng lặp
+- Giao diện tinh giản, phản hồi tốt — không dùng framework, không cần bước build
+- Backend chỉ với một file Python duy nhất (~150 dòng)
 
-## Quick Start
+## Khởi động nhanh
 
 ```bash
-brew install yt-dlp ffmpeg    # or apt install ffmpeg && pip install yt-dlp
+# Cài đặt yt-dlp và ffmpeg:
+# macOS: brew install yt-dlp ffmpeg
+# Windows: winget install yt-dlp ffmpeg (hoặc dùng scoop)
+# Linux: apt install ffmpeg && pip install yt-dlp
+
 git clone https://github.com/averygan/reclip.git
 cd reclip
 ./reclip.sh
 ```
 
-Open **http://localhost:8899**.
+Mở **http://localhost:8899**.
 
-Or with Docker:
+Hoặc sử dụng Docker:
 
 ```bash
 docker build -t reclip . && docker run -p 8899:8899 reclip
 ```
 
-## Usage
+## Hướng dẫn sử dụng
 
-1. Paste one or more video URLs into the input box
-2. Choose **MP4** (video) or **MP3** (audio)
-3. Click **Fetch** to load video info and thumbnails
-4. Select quality/resolution if available
-5. Click **Download** on individual videos, or **Download All**
+1. Dán một hoặc nhiều đường dẫn video vào ô nhập liệu
+2. Chọn định dạng **MP4** (video) hoặc **MP3** (âm thanh)
+3. Nhấp vào **Tải thông tin** để tải thông tin video và ảnh thu nhỏ (thumbnail)
+4. Chọn chất lượng/độ phân giải nếu có sẵn
+5. Nhấp vào **Tải xuống** cho từng video riêng lẻ, hoặc **Tải tất cả**
 
-## Supported Sites
+## Các trang web được hỗ trợ
 
-Anything [yt-dlp supports](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), including:
+Bất kỳ trang web nào được [yt-dlp hỗ trợ](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), bao gồm:
 
-YouTube, TikTok, Instagram, Twitter/X, Reddit, Facebook, Vimeo, Twitch, Dailymotion, SoundCloud, Loom, Streamable, Pinterest, Tumblr, Threads, LinkedIn, and many more.
+YouTube, TikTok, Instagram, Twitter/X, Reddit, Facebook, Vimeo, Twitch, Dailymotion, SoundCloud, Loom, Streamable, Pinterest, Tumblr, Threads, LinkedIn, và nhiều trang khác.
 
-## Stack
+## Công nghệ sử dụng
 
-- **Backend:** Python + Flask (~150 lines)
-- **Frontend:** Vanilla HTML/CSS/JS (single file, no build step)
-- **Download engine:** [yt-dlp](https://github.com/yt-dlp/yt-dlp) + [ffmpeg](https://ffmpeg.org/)
-- **Dependencies:** 2 (Flask, yt-dlp)
+- **Backend:** Python + Flask (~150 dòng)
+- **Frontend:** Vanilla HTML/CSS/JS (một file duy nhất, không cần bước build)
+- **Engine tải xuống:** [yt-dlp](https://github.com/yt-dlp/yt-dlp) + [ffmpeg](https://ffmpeg.org/)
+- **Thư viện phụ thuộc:** 2 (Flask, yt-dlp)
 
-## Disclaimer
+## Tuyên bố từ chối trách nhiệm
 
-This tool is intended for personal use only. Please respect copyright laws and the terms of service of the platforms you download from. The developers are not responsible for any misuse of this tool.
+Công cụ này chỉ dành cho mục đích sử dụng cá nhân. Vui lòng tôn trọng luật bản quyền và điều khoản dịch vụ của các nền tảng mà bạn tải nội dung xuống. Các nhà phát triển không chịu trách nhiệm cho bất kỳ hành vi lạm dụng hoặc sử dụng sai mục đích công cụ này.
 
-## License
+## Giấy phép
 
 [MIT](LICENSE)

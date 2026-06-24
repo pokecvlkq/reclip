@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "schema_version": "1.1.0",
+    "awf_version": "3.3.0"
+  },
+  "project": {
+    "name": "ReClip",
+    "type": "Web App / Media Downloader",
+    "status": "Completed"
+  },
+  "tech_stack": {
+    "frontend": {
+      "language": "HTML/CSS/JS (Vanilla)",
+      "framework": "None",
+      "style": "Premium Dark Mode (Inter font, Glassmorphism, Ambient Glow, CSS transitions)"
+    },
+    "backend": {
+      "language": "Python 3.12",
+      "framework": "Flask",
+      "engine": "yt-dlp",
+      "media_processor": "ffmpeg"
+    }
+  },
+  "database_schema": {
+    "summary": "Không sử dụng Database. Dữ liệu jobs tải được lưu tạm thời trong RAM (dict jobs toàn cục) và file tải về lưu tại thư mục downloads/."
+  },
+  "api_endpoints": [
+    {
+      "path": "/",
+      "method": "GET",
+      "explained": "Trả về giao diện web chính của ứng dụng."
+    },
+    {
+      "path": "/api/info",
+      "method": "POST",
+      "explained": "Lấy thông tin chi tiết của video (tiêu đề, ảnh thu nhỏ, thời lượng, độ phân giải khả dụng) qua yt-dlp. Yêu cầu truyền tham số url hợp lệ."
+    },
+    {
+      "path": "/api/download",
+      "method": "POST",
+      "explained": "Bắt đầu tải video hoặc nhạc dưới nền (background thread). Trả về job_id để frontend check trạng thái."
+    },
+    {
+      "path": "/api/status/<job_id>",
+      "method": "GET",
+      "explained": "Kiểm tra trạng thái hiện tại của job tải (đang tải, thành công hoặc lỗi)."
+    },
+    {
+      "path": "/api/file/<job_id>",
+      "method": "GET",
+      "explained": "Gửi file đã tải về máy khách dưới dạng attachment."
+    }
+  ],
+  "business_rules": [
+    "Đường dẫn video đầu vào bắt buộc phải bắt đầu bằng http:// hoặc https:// để đảm bảo an toàn.",
+    "File đã tải xuống và thông tin tác vụ cũ quá 1 giờ sẽ được tự động xóa bởi một luồng ngầm định kỳ 10 phút quét một lần."
+  ],
+  "knowledge_items": {
+    "gotchas": [
+      "yt-dlp cần được cập nhật thường xuyên để tránh lỗi không tải được từ các nền tảng khi họ thay đổi thuật toán.",
+      "ffmpeg bắt buộc phải được cài đặt và đưa vào PATH hệ thống để thực hiện việc chuyển đổi định dạng nhạc (MP3) hoặc ghép video/audio."
+    ]
+  }
+}
